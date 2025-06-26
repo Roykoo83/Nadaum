@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디지털 트윈 - 산업의 미래</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        :root {
+            --primary-color: #FFFFFF;
+            --highlight-color: #FFFFFF;
+            --background-color: #080a0c;
+            --trustworthy-blue: #5D9CEC;
+            --font-family: 'Pretendard', sans-serif;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: var(--font-family);
+        }
+
+        #presentation-container {
+            width: 1920px;
+            height: 1080px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            transform-origin: center center;
+            background-color: var(--background-color);
+            box-shadow: 0 0 100px rgba(93, 156, 236, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease-out;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--primary-color);
+            padding: 50px;
+            box-sizing: border-box;
+        }
+
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .content {
+            max-width: 1400px;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .animated {
+            opacity: 0;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .page.active .animated.fade-in {
+            opacity: 1;
+        }
+        .animated.fade-in-up {
+            transform: translateY(30px);
+        }
+        .page.active .animated.fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .animated.zoom-in {
+            transform: scale(0.9);
+        }
+        .page.active .animated.zoom-in {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .animated.slide-in-left {
+            transform: translateX(-50px);
+        }
+        .page.active .animated.slide-in-left {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .animated.slide-in-right {
+            transform: translateX(50px);
+        }
+        .page.active .animated.slide-in-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        h1, h2, h3 { font-weight: 700; margin: 20px 0; text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+        h1 { font-size: 80px; }
+        h2 { font-size: 64px; }
+        h3 { font-size: 48px; }
+        p { font-size: 28px; font-weight: 400; line-height: 1.6; color: #ccc; }
+        .cinematic-title { font-size: 100px; font-weight: 900; }
+        .cinematic-title-sub { font-size: 70px; color: var(--highlight-color); font-weight: 900; }
+        .cinematic-title-final { font-size: 72px; }
+        .question-title { color: var(--trustworthy-blue); margin-bottom: 30px; font-weight: 600; }
+        .emphasis { color: var(--highlight-color); font-weight: 700; }
+
+        .background-video { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: cover; transform: translate(-50%, -50%); z-index: 0; opacity: 0.3; }
+        .video-overlay { position: relative; z-index: 1; background-color: rgba(0, 0, 0, 0.3); padding: 50px; border-radius: 20px; }
+        .page-image { max-width: 70%; max-height: 550px; object-fit: contain; margin-top: 30px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4); }
+        .full-width-video { width: 90%; height: 600px; object-fit: cover; margin-top: 30px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5); }
+        
+        .logo-placeholder { display: flex; gap: 80px; align-items: center; margin-top: 40px; justify-content: center; }
+        .logo-wrapper { width: 400px; height: 150px; display: flex; justify-content: center; align-items: center; }
+        .logo { max-width: 100%; max-height: 100%; object-fit: contain; filter: brightness(0) invert(1); }
+        .final-logo .logo { max-height: 150px; }
+
+        .split-view { display: flex; width: 100%; justify-content: space-around; align-items: center; margin-top: 30px; }
+        .split-left, .split-right { width: 45%; text-align: center; }
+        .split-image { width: 100%; height: 350px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3); }
+        .split-image.bright { filter: brightness(1.1); }
+        .split-image.dark { filter: brightness(0.7); }
+        #price-tag { font-size: 72px; font-weight: 700; color: #FF4136; position: absolute; top: 50%; left: 50%; transition: opacity 2.5s ease-out, transform 2.5s ease-out; z-index: 10; transform: translate(-50%,-50%) scale(0.9); opacity:0; line-height: 1.4; }
+        #price-tag.visible { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        .hidden { visibility: hidden; opacity: 0 !important; }
+
+        .infographic-container { display: flex; justify-content: space-around; width: 100%; margin: 50px 0; gap: 30px; }
+        .infographic-step { position: relative; width: 30%; padding: 30px; border: 1px solid #333; border-radius: 15px; text-align: center; background: linear-gradient(145deg, #181b1f, #0d0f11); transition: transform 0.4s, box-shadow 0.4s; overflow: hidden; }
+        .infographic-step .bg-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.1; transition: opacity 0.4s, transform 0.4s; }
+        .infographic-step:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 10px 40px rgba(93, 156, 236, 0.3); }
+        .infographic-step:hover .bg-image { opacity: 0.2; transform: scale(1.1); }
+        .infographic-step > * { position: relative; z-index: 1; }
+        .step-number { font-size: 60px; font-weight: 700; color: var(--highlight-color); margin-bottom: 10px; }
+        .step-title { font-size: 28px; font-weight: 500; margin-bottom: 15px; color: var(--trustworthy-blue); }
+        .step-description { font-size: 20px; line-height: 1.4; color: #bbb; }
+
+        .demo-button { padding: 15px 30px; font-size: 24px; background-color: var(--highlight-color); color: var(--background-color); border: none; cursor: pointer; margin-top: 20px; font-weight: 700; transition: transform 0.2s; border-radius: 5px; }
+        .demo-button:hover { transform: scale(1.05); }
+        .demo-placeholder { position: relative; width: 100%; display: flex; justify-content: center; }
+        .demo-video { max-width: 80%; max-height: 450px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); }
+        #alert-zone, #optimization-result { position: absolute; top: 50%; left: 50%; color: var(--highlight-color); font-size: 40px; font-weight: 700; animation: pulse 1.5s infinite; text-align: center; background-color: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; transition: opacity 0.5s; transform: translate(-50%,-50%); }
+        
+        #fullscreen-button { position: absolute; top: 20px; right: 20px; padding: 10px 15px; background-color: rgba(0, 0, 0, 0.5); color: var(--primary-color); border: 1px solid #555; border-radius: 5px; cursor: pointer; font-family: var(--font-family); font-size: 16px; z-index: 1000; display: flex; align-items: center; gap: 8px; transition: opacity 0.3s; }
+        #fullscreen-button.hidden { opacity: 0; pointer-events: none; }
+        #fullscreen-button svg { width: 20px; height: 20px; fill: var(--primary-color); }
+        #fullscreen-button:hover { background-color: rgba(93, 156, 236, 0.8); }
+
+        #pagination { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 100; }
+        .dot { width: 12px; height: 12px; background-color: #555; border-radius: 50%; cursor: pointer; transition: background-color 0.3s; }
+        .dot.active { background-color: var(--highlight-color); }
+        .citation { font-size: 14px; color: #777; position: absolute; bottom: 20px; right: 30px; z-index: 50; }
+
+        .ask-text { font-size: 48px; line-height: 1.5; font-weight: 500; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } 100% { transform: translate(-50%, -50%) scale(1); } }
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        <button id="fullscreen-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+            <span>전체 화면</span>
+        </button>
+
+        <section class="page active">
+            <video class="background-video" src="assets/page_01_hero.mp4" autoplay loop muted playsinline></video>
+            <div class="content video-overlay">
+                <h1 class="cinematic-title animated fade-in" style="transition-delay: 0.2s;">산업의 다음 100년,</h1>
+                <h1 class="cinematic-title-sub animated fade-in" style="transition-delay: 0.8s;">이미 시작되었습니다.</h1>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="question-title animated fade-in-up">만약, 공장의 미래를 지금 볼 수 있다면?</h2>
+                <p class="animated fade-in-up" style="transition-delay: 0.2s;">물리적으로 정확한 시뮬레이션, AI 기반의 선제적 예측.<br>눈에 보이지 않던 모든 비효율과 잠재적 위험을 통제하는 세상.</p>
+                <img src="assets/page_02_future.png" alt="이상적인 디지털 트윈 시각화" class="page-image animated zoom-in" style="transition-delay: 0.4s;">
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="animated fade-in-up">Nvidia와 Palantir, 미래를 현실로 만들다.</h2>
+                <p class="animated fade-in-up" style="transition-delay: 0.2s;">그들은 산업의 디지털 전환이 가야 할 길을 증명했습니다.<br>하지만, 그들이 제시한 미래는 모두를 위한 것이었을까요?</p>
+                 <div class="logo-placeholder">
+                     <div class="logo-wrapper animated zoom-in" style="transition-delay: 0.4s;">
+                        <img src="assets/page_03_nvidia_logo.png" alt="Nvidia 로고" class="logo">
+                     </div>
+                     <div class="logo-wrapper animated zoom-in" style="transition-delay: 0.6s;">
+                        <img src="assets/page_03_palantir_logo.png" alt="Palantir 로고" class="logo">
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="question-title animated fade-in-up">이 혁명의 과실은,<br>소수만의 전유물이 될 것인가?</h2>
+                <div class="split-view">
+                    <div class="split-left animated slide-in-left" style="transition-delay: 0.2s;">
+                        <h3>Advanced Smart Factory</h3>
+                        <img src="assets/page_04_smart_factory.png" alt="첨단 스마트 팩토리" class="split-image bright">
+                    </div>
+                    <div class="split-right animated slide-in-right" style="transition-delay: 0.2s;">
+                        <h3>Traditional Factory</h3>
+                        <img src="assets/page_04_traditional_factory.png" alt="기존 공장" class="split-image dark">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content">
+                 <h2 class="question-title animated fade-in-up">혁신을 가로막는 거대한 장벽: 비용</h2>
+                 <p class="animated fade-in-up" style="transition-delay: 0.5s;">거대한 초기 투자 비용 외에도, 보이지 않는 운영 비용이 존재합니다.</p>
+                 <img src="assets/page_05_cost_barrier.png" alt="높은 비용 장벽 시각화" class="page-image" style="opacity: 0.3;">
+                 <div id="price-tag" class="hidden">도입 비용 $2,000,000+<br><span style="font-size: 50px; color: #ccc;">& 유지보수 연간 $100,000+</span></div>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                 <h2 class="question-title animated fade-in-up">우리는 질문을 바꿨습니다:<br><span class="emphasis">무엇이 진짜 문제인가?</span></h2>
+                 <p class="animated fade-in-up" style="transition-delay: 0.3s;">"어떻게 더 좋은 기술을 만들까?" 가 아니라,<br>"어떻게 더 많은 기업이 혁신에 동참할 수 있을까?"</p>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                 <h2 class="question-title animated fade-in-up">해답은 기술이 아닌 '<span class="emphasis">데이터의 맥락</span>'에 있습니다.</h2>
+                 <p class="animated fade-in-up" style="transition-delay: 0.2s;">데이터는 사람과 프로세스라는 맥락 속에서만 생명을 얻습니다.<br>우리는 기술을 팔기 전에, '부트캠프'를 통해 고객의 문제를 근본적으로 진단하고<br>실질적인 가치를 제공하는 '실용적 온톨로지'를 구축합니다.</p>
+                 <video class="full-width-video animated zoom-in" style="transition-delay: 0.4s;" src="assets/page_07_ontology.mp4" autoplay loop muted playsinline></video>
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content">
+                <h2 class="question-title animated fade-in-up">우리의 해법: 가치 기반 스케일업<br>"레이어드 디지털 트윈"</h2>
+                <div class="infographic-container">
+                    <div class="infographic-step animated fade-in-up" style="transition-delay: 0.2s;">
+                        <img class="bg-image" src="assets/page_08_bg_1.png">
+                        <div class="step-number">1</div>
+                        <div class="step-title">2D 도면 &amp; 레이아웃</div>
+                        <p class="step-description">기존 2D 도면을 활용하여<br>디지털 공간에 기초를 구축합니다.</p>
+                    </div>
+                    <div class="infographic-step animated fade-in-up" style="transition-delay: 0.4s;">
+                        <img class="bg-image" src="assets/page_08_bg_2.png">
+                        <div class="step-number">2</div>
+                        <div class="step-title">설비 외관 모델링</div>
+                        <p class="step-description">실제와 유사한 설비 외관을<br>빠르고 효율적으로 구현합니다.</p>
+                    </div>
+                    <div class="infographic-step animated fade-in-up" style="transition-delay: 0.6s;">
+                        <img class="bg-image" src="assets/page_08_bg_3.png">
+                        <div class="step-number">3</div>
+                        <div class="step-title">3D 모델링 &amp; 시뮬레이션</div>
+                        <p class="step-description">핵심 설비의 정밀 모델링과<br>시뮬레이션으로 운영을 최적화합니다.</p>
+                    </div>
+                </div>
+                <p class="animated fade-in-up" style="transition-delay: 0.8s;">고객은 투자한 만큼 즉각적인 가치를 얻고, 다음 단계로 나아갈 확신을 얻습니다.</p>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="question-title animated fade-in-up">우리의 독점적 전략: "<span class="emphasis">안전한 충북</span>"</h2>
+                <p class="animated fade-in-up" style="transition-delay: 0.2s;">'안전'이라는 대의명분 아래, 정부 예산을 활용해 기업의 초기 도입 비용을 해결합니다.<br>이것은 경쟁자가 모방할 수 없는 우리만의 강력한 해자(Moat)입니다.</p>
+                <video class="full-width-video animated zoom-in" style="transition-delay: 0.4s;" src="assets/page_09_chungbuk_map.mp4" autoplay loop muted playsinline></video>
+                <p class="citation animated fade-in" style="transition-delay: 0.6s;">*Source: 충청북도 재난안전 플랫폼 실증사업</p>
+            </div>
+        </section>
+        
+        <section class="page">
+             <div class="content">
+                <h2 class="animated fade-in-up">기술 보급을 넘어, 산업 생태계를 창조합니다.</h2>
+                <video class="full-width-video animated zoom-in" style="transition-delay: 0.2s;" src="assets/page_10_ecosystem.mp4" autoplay loop muted playsinline></video>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h1 class="cinematic-title animated fade-in-up">LIVE DEMO</h1>
+                <h2 class="cinematic-title-sub animated fade-in-up" style="transition-delay: 0.3s;">백 마디 말보다, 하나의 경험으로 증명합니다.</h2>
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content demo-content">
+                <h3 class="animated fade-in-up">1단계 - 관제: "모든 것을 보고, 모든 것을 압니다."</h3>
+                <img src="assets/page_12_monitoring_demo.png" alt="실시간 관제 데모 화면" class="demo-image animated zoom-in" style="transition-delay: 0.2s;">
+                 <p class="citation animated fade-in" style="transition-delay: 0.4s;">*Source: (충북재난안전2차) AI메타버스기반 플랫폼 개발 및 구축_rev01_20250526_임원보고.pdf, p.19</p>
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content demo-content">
+                <h3 class="animated fade-in-up">위험 감지 및 대응: "위험은 예측되고, 대응은 자동화됩니다."</h3>
+                <div class="demo-placeholder animated zoom-in" style="transition-delay: 0.2s;">
+                    <video class="demo-video" src="assets/page_13_alert_system.mp4" autoplay loop muted playsinline></video>
+                    <div id="alert-zone" class="hidden">🚨 설비 정지! A설비 담당자 즉시 현장 출동! 🚨</div>
+                </div>
+                <button class="demo-button animated fade-in-up" style="transition-delay: 0.4s;" onclick="triggerFireAlert()">설비 정지 시뮬레이션</button>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content demo-content">
+                <h3 class="animated fade-in-up">2단계 - 최적화: "비효율을 찾아내고, 생산성을 극대화합니다."</h3>
+                 <div class="demo-placeholder animated zoom-in" style="transition-delay: 0.2s;">
+                     <img src="assets/page_14_optimization_ui.png" alt="생산 최적화 UI" class="demo-image">
+                    <div id="optimization-result" class="hidden">📈 시뮬레이션 결과: 생산량 15% 증가 📈</div>
+                </div>
+                <button class="demo-button animated fade-in-up" style="transition-delay: 0.4s;" onclick="runOptimization()">최적화 시뮬레이션</button>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h3 class="animated fade-in-up">사람과의 연결: "현장의 작업자는 더 이상 외롭지 않습니다."</h3>
+                <img src="assets/page_15_ar_guidance.png" alt="AR 글라스를 통한 작업 안내" class="page-image animated zoom-in" style="transition-delay: 0.2s;">
+                <p class="citation animated fade-in" style="transition-delay: 0.4s;">*Source: (충북재난안전2차) AI메타버스기반 플랫폼 개발 및 구축_rev01_20250526_임원보고.pdf, p.35</p>
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content">
+                <h2 class="animated fade-in-up">우리는 보이지 않는 것을 보게 합니다.</h2>
+                <video class="full-width-video animated zoom-in" style="transition-delay: 0.2s;" src="assets/page_16_value_proposition.mp4" autoplay loop muted playsinline></video>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="animated fade-in-up">확장성: "충북은 시작일 뿐입니다."</h2>
+                <img src="assets/page_17_expansion_map.png" alt="전국 및 아시아 확장 비전 맵" class="page-image animated zoom-in" style="transition-delay: 0.2s;">
+            </div>
+        </section>
+        
+        <section class="page">
+            <div class="content">
+                <h2 class="question-title animated fade-in-up">The Ask: <span class="emphasis" style="font-size: 80px; font-weight: 900;">미래를 함께 만들 팀</span>에 투자해주십시오.</h2>
+                <p class="ask-text animated fade-in-up" style="transition-delay: 0.4s;">
+                    이 위대한 비전을 현실로 만들,
+                    <br>
+                    세상을 바꿀 동료를 찾고 있습니다.
+                    <br>
+                    저희는 돈이 아닌,
+                    <br>
+                    <strong class="emphasis">미래를 개척할 최고의 팀</strong>에 투자해주시길 간절히 바랍니다.
+                </p>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h2 class="animated fade-in-up">이 비전을 현실로 만들 사람들</h2>
+                <img src="assets/page_19_team.png" alt="핵심 팀 단체 사진" class="page-image animated zoom-in" style="transition-delay: 0.2s;">
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                <h1 class="cinematic-title-final animated fade-in-up">"미래를 예측하는 가장 좋은 방법은,<br>미래를 직접 만드는 것입니다."</h1>
+                <div class="logo-placeholder animated zoom-in" style="transition-delay: 1s;">
+                    <div class="final-logo">
+                       <img src="assets/page_20_logo.png" alt="회사 로고" class="logo">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="content">
+                 <h2 class="animated fade-in-up">이것이 우리가 꿈꾸는<br><span class="emphasis" style="font-size: 72px;">살아있는 현실</span>입니다.</h2>
+                 <video class="full-width-video animated zoom-in" style="transition-delay: 0.5s; height: 700px;" src="assets/page_21_final_vision.mp4" autoplay loop muted playsinline></video>
+            </div>
+        </section>
+    </div>
+
+    <div id="pagination"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('presentation-container');
+            const pages = document.querySelectorAll('.page');
+            const paginationContainer = document.getElementById('pagination');
+            const fullscreenBtn = document.getElementById('fullscreen-button');
+            let currentPage = 0;
+            const totalPages = pages.length;
+
+            function init() {
+                setupPagination();
+                updatePage();
+                container.addEventListener('wheel', handleScroll, { passive: false });
+                window.addEventListener('resize', handleResize);
+                fullscreenBtn.addEventListener('click', toggleFullscreen);
+                document.addEventListener('fullscreenchange', handleFullscreenChange);
+                handleResize();
+            }
+
+            function setupPagination() {
+                for (let i = 0; i < totalPages; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot');
+                    dot.dataset.page = i;
+                    dot.addEventListener('click', () => {
+                        currentPage = i;
+                        updatePage();
+                    });
+                    paginationContainer.appendChild(dot);
+                }
+            }
+
+            function updatePage() {
+                pages.forEach((page, index) => {
+                    page.classList.toggle('active', index === currentPage);
+                    if (index === currentPage) {
+                        handlePageSpecificLogic(index);
+                    }
+                });
+                document.querySelectorAll('.dot').forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentPage);
+                });
+            }
+
+            let isScrolling = false;
+            function handleScroll(e) {
+                if (isScrolling) return;
+                e.preventDefault();
+                if (e.deltaY > 0) {
+                    currentPage = Math.min(totalPages - 1, currentPage + 1);
+                } else {
+                    currentPage = Math.max(0, currentPage - 1);
+                }
+                updatePage();
+                isScrolling = true;
+                setTimeout(() => { isScrolling = false; }, 1200);
+            }
+
+            function handleResize() {
+                const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            }
+
+            function handlePageSpecificLogic(pageIndex) {
+                const priceTag = document.getElementById('price-tag');
+                if (pageIndex === 4) { 
+                     setTimeout(() => { priceTag.classList.remove('hidden'); priceTag.classList.add('visible'); }, 800);
+                } else {
+                    priceTag.classList.add('hidden');
+                    priceTag.classList.remove('visible');
+                }
+            }
+            
+            window.triggerFireAlert = function() {
+                const alertZone = document.getElementById('alert-zone');
+                alertZone.classList.remove('hidden');
+                setTimeout(() => alertZone.classList.add('hidden'), 5000);
+            }
+
+            window.runOptimization = function() {
+                const resultZone = document.getElementById('optimization-result');
+                resultZone.classList.remove('hidden');
+                setTimeout(() => resultZone.classList.add('hidden'), 5000);
+            }
+
+            function toggleFullscreen() {
+                const elem = document.documentElement;
+                if (!document.fullscreenElement) {
+                    elem.requestFullscreen().catch(err => {
+                        alert(`전체 화면 모드를 시작할 수 없습니다: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            function handleFullscreenChange() {
+                if (document.fullscreenElement) {
+                    fullscreenBtn.classList.add('hidden');
+                } else {
+                    fullscreenBtn.classList.remove('hidden');
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
